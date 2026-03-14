@@ -17,7 +17,7 @@ const callGemini = async (model: string, contents: any, config?: any) => {
   return data.response;
 };
 
-const FLASH_MODEL = 'gemini-2.0-flash';
+const FLASH_MODEL = 'gemini-2.5-flash-preview-04-17';
 const IMAGE_MODEL = 'gemini-2.5-flash-image';
 
 export const hasAnyApiKey = () => {
