@@ -3,17 +3,42 @@ import { createServer as createViteServer } from "vite";
 import nodemailer from "nodemailer";
 import path from "path";
 import { fileURLToPath } from "url";
+import { GoogleGenAI } from "@google/genai";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
   app.use(express.json({ limit: '50mb' }));
 
-  // API Routes
+  // ─── Gemini Proxy ────────────────────────────────────────────────────────────
+  app.post("/api/gemini", async (req, res) => {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ error: "GEMINI_API_KEY not configured on server" });
+    }
+
+    const { model, contents, config } = req.body;
+
+    if (!model || !contents) {
+      return res.status(400).json({ error: "Missing required fields: model, contents" });
+    }
+
+    try {
+      const ai = new GoogleGenAI({ apiKey });
+      const response = await ai.models.generateContent({ model, contents, config });
+      res.json({ response });
+    } catch (error: any) {
+      console.error("Gemini proxy error:", error);
+      res.status(500).json({ error: error?.message || "Error calling Gemini API" });
+    }
+  });
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  // ─── Email Route ─────────────────────────────────────────────────────────────
   app.post("/api/request-logo", async (req, res) => {
     const { email, logoData, businessName } = req.body;
 
@@ -22,8 +47,6 @@ async function startServer() {
     }
 
     try {
-      // NOTE: For a real production app, you would use a real SMTP service like SendGrid, Mailgun, etc.
-      // Here we set up a transporter. The user will need to provide their own credentials in .env
       const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST || "smtp.ethereal.email",
         port: Number(process.env.SMTP_PORT) || 587,
@@ -34,7 +57,6 @@ async function startServer() {
         },
       });
 
-      // Email to the admin
       const adminMailOptions = {
         from: '"EmprendeAI" <noreply@emprendeai.com>',
         to: "guillen.mateo@es.uazuay.edu.ec",
@@ -50,15 +72,15 @@ async function startServer() {
       };
 
       await transporter.sendMail(adminMailOptions);
-
       res.json({ success: true, message: "Solicitud enviada con éxito" });
     } catch (error) {
       console.error("Error sending email:", error);
       res.status(500).json({ error: "Error al enviar la solicitud" });
     }
   });
+  // ─────────────────────────────────────────────────────────────────────────────
 
-  // Vite middleware for development
+  // ─── Static / Vite ───────────────────────────────────────────────────────────
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -71,6 +93,7 @@ async function startServer() {
       res.sendFile(path.join(__dirname, "dist", "index.html"));
     });
   }
+  // ─────────────────────────────────────────────────────────────────────────────
 
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT}`);
