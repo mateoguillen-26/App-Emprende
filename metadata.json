@@ -1,0 +1,7 @@
+{
+  "name": "GITHUB EmprendeAI: Planificador Inteligente",
+  "description": "Una herramienta avanzada para estructurar, diseñar y lanzar tu emprendimiento desde cero hasta un plan de acción concreto.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
