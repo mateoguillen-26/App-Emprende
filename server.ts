@@ -30,7 +30,10 @@ async function startServer() {
     try {
       const ai = new GoogleGenAI({ apiKey });
       const response = await ai.models.generateContent({ model, contents, config });
-      res.json({ response });
+      res.json({ response: {
+        text: response.text,
+        candidates: response.candidates,
+      } });
     } catch (error: any) {
       console.error("Gemini proxy error:", error);
       res.status(500).json({ error: error?.message || "Error calling Gemini API" });
