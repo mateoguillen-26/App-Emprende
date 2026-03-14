@@ -18,7 +18,7 @@ const callGemini = async (model: string, contents: any, config?: any) => {
 };
 
 const FLASH_MODEL = 'gemini-2.0-flash';
-const IMAGE_MODEL = 'gemini-2.0-flash-preview-image-generation';
+const IMAGE_MODEL = 'gemini-2.5-flash-image';
 
 export const hasAnyApiKey = () => {
   // Key lives on the server — always return true for UI purposes
