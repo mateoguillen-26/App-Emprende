@@ -47,11 +47,44 @@ export const generateLogo = async (brandName: string, style: string, colors: str
   try {
     const response = await callGemini(
       IMAGE_MODEL,
-      `Diseña un logotipo minimalista, moderno y vectorial para una empresa llamada "${brandName}". Estilo: ${style}. Paleta de colores: ${colors}. El fondo debe ser blanco puro.`,
+      `Actúa como un diseñador experto en branding corporativo y diseño de identidad visual.
+
+Diseña un logo para la marca "${brandName}".
+
+ESTILO Y COMPOSICIÓN:
+- Estilo visual: ${style}, minimalista, elegante, moderno y atemporal
+- Composición: isotipo simple + logotipo tipográfico equilibrado
+- Lenguaje visual: formas geométricas limpias, proporciones claras, lectura inmediata y alto reconocimiento de marca
+- Tipografía: acorde al isotipo, con armonía visual y excelente legibilidad
+
+PALETA DE COLOR:
+- Colores: ${colors}
+- Paleta reducida y estratégica, versátil para aplicaciones corporativas, digitales e impresas
+- Fondo blanco puro
+
+REQUISITOS TÉCNICOS:
+- Totalmente vectorizable
+- Simpleza alta, sin elementos complejos
+- Óptima escalabilidad (funciona en tamaños pequeños y grandes)
+- Apto para impresión, bordado, serigrafía, papelería, packaging, señalética y medios digitales
+- Debe funcionar en positivo, negativo, monocromo y escala de grises
+
+RESTRICCIONES ESTRICTAS:
+- Sin efectos 3D
+- Sin degradados complejos
+- Sin sombras
+- Sin detalles finos difíciles de reproducir
+- Sin composiciones recargadas
+- Sin iconografía cliché
+- Sin elementos imposibles de vectorizar
+
+RESULTADO ESPERADO:
+Un logo sólido, profesional y coherente, visualmente equilibrado entre isotipo y tipografía, que transmita confianza, carácter premium y sea distintivo.`,
       {
         responseModalities: ["IMAGE", "TEXT"],
       }
     );
+
     const part = response.candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData);
     return part ? `data:image/png;base64,${part.inlineData.data}` : null;
   } catch (error) {
