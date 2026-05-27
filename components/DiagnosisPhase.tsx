@@ -22,7 +22,7 @@ export const DiagnosisPhase: React.FC<DiagnosisPhaseProps> = ({ data, updateData
       <div className="space-y-8">
         <div>
           <label className="block text-xs font-bold text-text-secondary uppercase tracking-wider mb-3 ml-1">
-            ¿Cómo se llama tu emprendimiento?
+            ¿Cómo se llama tu emprendimiento? Recuerda que en base al nombre se genera el logo!
           </label>
           <input
             type="text"
