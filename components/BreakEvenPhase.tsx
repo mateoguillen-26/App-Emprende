@@ -246,14 +246,14 @@ export const BreakEvenPhase: React.FC<BreakEvenPhaseProps> = ({ data, updateData
                 <div className="w-12 h-12 rounded-2xl bg-brand-500/10 flex items-center justify-center text-brand-500">
                   <Calculator size={24} />
                 </div>
-                <h3 className="text-xl font-bold text-navy-950 uppercase tracking-tight">Costos Fijos Mensuales</h3>
+                <h3 className="text-xl font-bold text-navy-950 uppercase tracking-tight">Egresos Fijos Mensuales</h3>
               </div>
               <div className="grid grid-cols-1 gap-2">
                 <InputField label="Arriendo" value={formData.arriendo} onChange={(v) => handleInputChange('arriendo', v)} />
                 <InputField label="Servicios Básicos" value={formData.servicios} onChange={(v) => handleInputChange('servicios', v)} />
                 <InputField label="Salarios Empleados" value={formData.salariosEmpleados} onChange={(v) => handleInputChange('salariosEmpleados', v)} />
                 <InputField label="Tu Salario" value={formData.salarioPropio} onChange={(v) => handleInputChange('salarioPropio', v)} />
-                <InputField label="Otros Costos Fijos" value={formData.otrosFijos} onChange={(v) => handleInputChange('otrosFijos', v)} />
+                <InputField label="Otros Egresos Fijos" value={formData.otrosFijos} onChange={(v) => handleInputChange('otrosFijos', v)} />
               </div>
             </div>
 
