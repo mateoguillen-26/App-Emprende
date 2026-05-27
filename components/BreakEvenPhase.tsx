@@ -264,7 +264,7 @@ export const BreakEvenPhase: React.FC<BreakEvenPhaseProps> = ({ data, updateData
                   <div className="w-12 h-12 rounded-2xl bg-brand-500/10 flex items-center justify-center text-brand-500">
                     <Package size={24} />
                   </div>
-                  <h3 className="text-xl font-bold text-navy-950 uppercase tracking-tight">Costos Variables (por unidad)</h3>
+                  <h3 className="text-xl font-bold text-navy-950 uppercase tracking-tight">Costos de Producción (por unidad)</h3>
                 </div>
                 <div className="grid grid-cols-1 gap-2">
                   <InputField label="Materia Prima" value={formData.materiaPrima} onChange={(v) => handleInputChange('materiaPrima', v)} />
