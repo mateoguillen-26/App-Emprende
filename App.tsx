@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AppStage, BusinessData } from './types';
+import { AppStage, BusinessData, createProductLine } from './types';
 import { StepWizard } from './components/StepWizard';
 import { DiagnosisPhase } from './components/DiagnosisPhase';
 import { AssetGeneratorPhase } from './components/AssetGeneratorPhase';
@@ -22,17 +22,14 @@ const initialData: BusinessData = {
   targetAudience: '',
   shortTermGoals: '',
   actionPlan: null, // Reset plan
+  canvasNotes: {},
   financials: {
     arriendo: 0,
     servicios: 0,
     salariosEmpleados: 0,
     salarioPropio: 0,
     otrosFijos: 0,
-    materiaPrima: 0,
-    transporte: 0,
-    otrosVariables: 0,
-    precioVenta: 0,
-    unidadesVendidas: 0
+    productos: [createProductLine(1)]
   }
 };
 

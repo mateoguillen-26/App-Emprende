@@ -20,6 +20,11 @@ const callGemini = async (model: string, contents: any, config?: any) => {
 const FLASH_MODEL = 'gemini-2.5-flash';
 const IMAGE_MODEL = 'gemini-2.5-flash-image';
 
+export interface MarketSource {
+  title: string;
+  uri: string;
+}
+
 export const hasAnyApiKey = () => {
   // Key lives on the server — always return true for UI purposes
   return true;
@@ -168,14 +173,17 @@ export const performMarketResearch = async (location: string, businessType: stri
       analysis = analysisMatch[1].trim();
     }
 
-    const sources = response.candidates?.[0]?.groundingMetadata?.groundingChunks
+    const sources: MarketSource[] = response.candidates?.[0]?.groundingMetadata?.groundingChunks
       ?.map((chunk: any) => ({
         title: chunk.web?.title || 'Fuente Externa',
         uri: chunk.web?.uri || '#'
       }))
-      .filter((s: any) => s.uri !== '#') || [];
+      .filter((s: MarketSource) => s.uri !== '#') || [];
 
-    const uniqueSources = Array.from(new Map(sources.map((item: any) => [item.uri, item])).values());
+    // Deduplicate by URI, keeping the tuple typed so the result stays MarketSource[].
+    const uniqueSources: MarketSource[] = Array.from(
+      new Map(sources.map((item) => [item.uri, item] as [string, MarketSource])).values()
+    );
 
     return {
       summary: summary.length > 0 ? summary : ["Datos limitados en esta zona.", "Se requiere investigación de campo."],

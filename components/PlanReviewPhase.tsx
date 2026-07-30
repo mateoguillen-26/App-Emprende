@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { BusinessData, BusinessCanvasData, CanvasSection } from '../types';
+import { BusinessData, BusinessCanvasData, CanvasSection, CanvasSectionKey } from '../types';
 import { generateCanvasData } from '../services/geminiService';
-import { 
-  Loader2, RefreshCcw, X, 
-  Handshake, Settings, Package, Heart, Users, 
-  Box, Truck, BarChart3, Wallet, ArrowUpRight, ArrowRight
+import {
+  Loader2, RefreshCcw, X,
+  Handshake, Settings, Package, Heart, Users,
+  Box, Truck, BarChart3, Wallet, Pencil, ArrowRight
 } from 'lucide-react';
 
 interface PlanReviewPhaseProps {
@@ -17,7 +17,15 @@ interface PlanReviewPhaseProps {
 
 export const PlanReviewPhase = ({ data, updateData, onNext, onBack, onReset }: PlanReviewPhaseProps) => {
   const [loading, setLoading] = useState(false);
-  const [selectedSection, setSelectedSection] = useState<{key: string, data: CanvasSection, color: string} | null>(null);
+  const [selectedSection, setSelectedSection] = useState<{
+    key: CanvasSectionKey; title: string; data: CanvasSection; color: string;
+  } | null>(null);
+
+  const notes = data.canvasNotes || {};
+
+  const setNote = (key: CanvasSectionKey, value: string) => {
+    updateData({ canvasNotes: { ...notes, [key]: value } });
+  };
 
   useEffect(() => {
     if (!data.actionPlan) {
@@ -51,19 +59,21 @@ export const PlanReviewPhase = ({ data, updateData, onNext, onBack, onReset }: P
     </div>
   );
 
-  const CanvasCard = ({ 
-    section, 
-    icon: Icon, 
+  const CanvasCard = ({
+    sectionKey,
+    section,
+    icon: Icon,
     className,
     accentColor = "text-brand-600",
-  }: { 
-    section: CanvasSection, 
-    icon: any, 
+  }: {
+    sectionKey: CanvasSectionKey,
+    section: CanvasSection,
+    icon: any,
     className?: string,
     accentColor?: string,
   }) => (
-    <div 
-      onClick={() => setSelectedSection({ key: section.title, data: section, color: accentColor })}
+    <div
+      onClick={() => setSelectedSection({ key: sectionKey, title: section.title, data: section, color: accentColor })}
       className={`relative p-6 bg-card rounded-[24px] shadow-soft cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:bg-white flex flex-col group border border-transparent hover:border-brand-200 ${className}`}
     >
       {/* Header */}
@@ -73,8 +83,8 @@ export const PlanReviewPhase = ({ data, updateData, onNext, onBack, onReset }: P
         </div>
         <h3 className="font-bold text-[11px] uppercase tracking-widest text-navy-950 opacity-80">{section.title}</h3>
       </div>
-      
-      {/* List */}
+
+      {/* AI suggestions */}
       <ul className="space-y-3 flex-1">
         {section.points.slice(0, 4).map((point, idx) => (
           <li key={idx} className="text-xs font-medium text-text-secondary flex items-start gap-3 leading-snug">
@@ -83,10 +93,22 @@ export const PlanReviewPhase = ({ data, updateData, onNext, onBack, onReset }: P
           </li>
         ))}
       </ul>
-      
-      {/* Decorative Pill Bar */}
-      <div className="mt-6 flex justify-center opacity-40 group-hover:opacity-100 transition-opacity">
-        <div className="w-10 h-1 bg-brand-500 rounded-full"></div>
+
+      {/* The user's own content. stopPropagation keeps typing from opening the modal. */}
+      <div
+        className="mt-5 pt-4 border-t border-gray-200/70"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <label className="flex items-center gap-1.5 text-[9px] font-black text-brand-600 uppercase tracking-widest mb-2">
+          <Pencil size={10} /> Lo mío
+        </label>
+        <textarea
+          value={notes[sectionKey] || ''}
+          onChange={(e) => setNote(sectionKey, e.target.value)}
+          placeholder="Escribe aquí lo tuyo. Ej: Proveedor Distribuidora García, contacto 099..."
+          rows={2}
+          className="w-full bg-white border border-gray-200 rounded-[14px] p-3 text-xs text-navy-950 leading-relaxed resize-y outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all placeholder-gray-400 shadow-sm"
+        />
       </div>
     </div>
   );
@@ -132,24 +154,27 @@ export const PlanReviewPhase = ({ data, updateData, onNext, onBack, onReset }: P
         
         {/* === INFRASTRUCTURE (Left) === */}
         {/* Key Partners */}
-        <CanvasCard 
-          section={plan.keyPartners} 
-          icon={Handshake} 
+        <CanvasCard
+          sectionKey="keyPartners"
+          section={plan.keyPartners}
+          icon={Handshake}
           className="md:col-span-1 md:row-span-2 min-h-[340px]"
           {...styles.standard}
         />
 
         {/* Column 2: Activities & Resources */}
         <div className="md:col-span-1 md:row-span-2 flex flex-col gap-4">
-          <CanvasCard 
-            section={plan.keyActivities} 
-            icon={Settings} 
+          <CanvasCard
+            sectionKey="keyActivities"
+            section={plan.keyActivities}
+            icon={Settings}
             className="flex-1"
             {...styles.standard}
           />
-          <CanvasCard 
-            section={plan.keyResources} 
-            icon={Box} 
+          <CanvasCard
+            sectionKey="keyResources"
+            section={plan.keyResources}
+            icon={Box}
             className="flex-1"
             {...styles.standard}
           />
@@ -157,9 +182,10 @@ export const PlanReviewPhase = ({ data, updateData, onNext, onBack, onReset }: P
 
         {/* === OFFER (Center) === */}
         {/* Value Propositions */}
-        <CanvasCard 
-          section={plan.valuePropositions} 
-          icon={Package} 
+        <CanvasCard
+          sectionKey="valuePropositions"
+          section={plan.valuePropositions}
+          icon={Package}
           className="md:col-span-1 md:row-span-2 min-h-[340px] border-t-4 border-t-brand-500"
           {...styles.highlight}
         />
@@ -167,39 +193,44 @@ export const PlanReviewPhase = ({ data, updateData, onNext, onBack, onReset }: P
         {/* === CUSTOMERS (Right) === */}
         {/* Column 4: Relationships & Channels */}
         <div className="md:col-span-1 md:row-span-2 flex flex-col gap-4">
-          <CanvasCard 
-            section={plan.customerRelationships} 
-            icon={Heart} 
+          <CanvasCard
+            sectionKey="customerRelationships"
+            section={plan.customerRelationships}
+            icon={Heart}
             className="flex-1"
             {...styles.standard}
           />
-          <CanvasCard 
-            section={plan.channels} 
-            icon={Truck} 
+          <CanvasCard
+            sectionKey="channels"
+            section={plan.channels}
+            icon={Truck}
             className="flex-1"
             {...styles.standard}
           />
         </div>
 
         {/* Customer Segments */}
-        <CanvasCard 
-          section={plan.customerSegments} 
-          icon={Users} 
+        <CanvasCard
+          sectionKey="customerSegments"
+          section={plan.customerSegments}
+          icon={Users}
           className="md:col-span-1 md:row-span-2 min-h-[340px]"
           {...styles.standard}
         />
 
         {/* === FINANCE (Bottom Row) === */}
         <div className="md:col-span-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <CanvasCard 
-              section={plan.costStructure} 
-              icon={Wallet} 
+            <CanvasCard
+              sectionKey="costStructure"
+              section={plan.costStructure}
+              icon={Wallet}
               className="min-h-[180px]"
               {...styles.finance}
             />
-            <CanvasCard 
-              section={plan.revenueStreams} 
-              icon={BarChart3} 
+            <CanvasCard
+              sectionKey="revenueStreams"
+              section={plan.revenueStreams}
+              icon={BarChart3}
               className="min-h-[180px]"
               {...styles.finance}
             />
@@ -220,7 +251,7 @@ export const PlanReviewPhase = ({ data, updateData, onNext, onBack, onReset }: P
           <div className="bg-card rounded-[32px] shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto animate-slide-up border border-white/50">
             <div className="sticky top-0 bg-[#F2F4F7]/95 backdrop-blur border-b border-gray-200 p-6 flex justify-between items-center z-10">
               <h3 className="text-lg font-black uppercase tracking-widest text-navy-950">
-                {selectedSection.key}
+                {selectedSection.title}
               </h3>
               <button 
                 onClick={() => setSelectedSection(null)}
@@ -247,6 +278,22 @@ export const PlanReviewPhase = ({ data, updateData, onNext, onBack, onReset }: P
                 <div className="text-text-secondary leading-relaxed text-sm whitespace-pre-wrap bg-white p-8 rounded-[24px] border border-gray-100 shadow-inner">
                   {selectedSection.data.detail}
                 </div>
+              </div>
+
+              <div className="mt-8">
+                <h4 className="flex items-center gap-1.5 text-[10px] font-bold text-brand-600 uppercase tracking-[0.2em] mb-4">
+                  <Pencil size={11} /> Lo mío
+                </h4>
+                <textarea
+                  value={notes[selectedSection.key] || ''}
+                  onChange={(e) => setNote(selectedSection.key, e.target.value)}
+                  placeholder="Concreta aquí tu caso: proveedores, nombres, cifras, acuerdos..."
+                  rows={6}
+                  className="w-full bg-white border border-gray-200 rounded-[24px] p-6 text-sm text-navy-950 leading-relaxed resize-y outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all placeholder-gray-400 shadow-inner"
+                />
+                <p className="text-[10px] text-gray-400 mt-2 ml-1">
+                  Se guarda automáticamente y aparecerá en el informe final.
+                </p>
               </div>
             </div>
 

@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BusinessData } from '../types';
-import { Box, Target, PenTool } from 'lucide-react';
+import { PenTool } from 'lucide-react';
 
 interface DiagnosisPhaseProps {
   data: BusinessData;
@@ -8,7 +8,34 @@ interface DiagnosisPhaseProps {
   onNext: () => void;
 }
 
+const INDUSTRIES = [
+  'Alimentos y Bebidas',
+  'Bienes Raíces',
+  'Servicios Profesionales',
+  'Tecnología y Software',
+  'Comercio Minorista',
+  'Educación',
+];
+
+const OTHER = 'Otros';
+
 export const DiagnosisPhase: React.FC<DiagnosisPhaseProps> = ({ data, updateData, onNext }) => {
+  // "Otros" is not stored in data.industry — the typed text is, so everything
+  // downstream (prompts, PDF) keeps reading a single field.
+  const [isCustom, setIsCustom] = useState(
+    data.industry !== '' && !INDUSTRIES.includes(data.industry)
+  );
+
+  const handleSelect = (value: string) => {
+    if (value === OTHER) {
+      setIsCustom(true);
+      updateData({ industry: '' });
+    } else {
+      setIsCustom(false);
+      updateData({ industry: value });
+    }
+  };
+
   const isFormValid = data.businessName.length > 2;
 
   return (
@@ -38,19 +65,35 @@ export const DiagnosisPhase: React.FC<DiagnosisPhaseProps> = ({ data, updateData
             ¿En qué industria o sector operarás?
           </label>
           <select
-            value={data.industry}
-            onChange={(e) => updateData({ industry: e.target.value })}
+            value={isCustom ? OTHER : data.industry}
+            onChange={(e) => handleSelect(e.target.value)}
             className="w-full p-5 bg-white border border-gray-200 rounded-[18px] focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-navy-950 font-medium shadow-sm appearance-none"
           >
             <option value="">Selecciona una industria...</option>
-            <option value="Alimentos y Bebidas">Alimentos y Bebidas</option>
-            <option value="Bienes Raíces">Bienes Raíces</option>
-            <option value="Servicios Profesionales">Servicios Profesionales</option>
-            <option value="Tecnología y Software">Tecnología y Software</option>
-            <option value="Comercio Minorista">Comercio Minorista</option>
-            <option value="Educación">Educación</option>
-            <option value="Otros">Otros</option>
+            {INDUSTRIES.map((ind) => (
+              <option key={ind} value={ind}>{ind}</option>
+            ))}
+            <option value={OTHER}>Otros (escribir la mía)</option>
           </select>
+
+          {isCustom && (
+            <div className="mt-4 animate-fade-in">
+              <div className="relative">
+                <PenTool className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-500" size={18} />
+                <input
+                  type="text"
+                  autoFocus
+                  value={data.industry}
+                  onChange={(e) => updateData({ industry: e.target.value })}
+                  placeholder="Escribe tu industria. Ej. Turismo rural, Reciclaje..."
+                  className="w-full p-5 pl-12 bg-white border border-brand-500/40 rounded-[18px] focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-navy-950 font-medium placeholder-gray-400 shadow-sm"
+                />
+              </div>
+              <p className="text-[10px] text-text-secondary mt-2 ml-1">
+                Se usará para el análisis de mercado y el plan estratégico.
+              </p>
+            </div>
+          )}
         </div>
 
         <button
